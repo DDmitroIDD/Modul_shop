@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div style="background-color: aqua">
+    {% block content %}
+        {% if request.user.is_authenticated and request.user.is_superuser == False %}
+            <form method="get" action="{% url 'logout' %}">
+                <br>
+                <input type="submit" value="Logout">
+            </form>
+            {% for prod in object_list %}
+                <form method="get" action="{% url 'create_purchase' prod.pk%}">
+                    <div style="background-color: coral">
+                        <P>Product: {{ prod.name }}
+                        <p>Description: {{ prod.description }}</p>
+                        <p>Price: {{ prod.price }}</p>
+                        <p>Stock availability: {{ prod.quantity_in_stock }}</p>
+                        <p>{{ purchase_form }}</p>
+                        {% csrf_token %}
+                        <input type="submit" value="Buy">
+                    </div>
+                </form>
+            {% endfor %}
+        {% endif %}
+        {% if request.user.is_superuser %}
+            <form method="get" action="{% url 'logout' %}">
+                <br>
+                <input type="submit" value="Logout">
+            </form>
+            <form method="get" action="{% url 'purchase_return' %}">
+                <input type="submit" value="Return view">
+            </form>
+            {% for prod in object_list %}
+                <div style="background-color: coral">
+                    <P>Product: {{ prod.name }}
+                    <p>Description: {{ prod.description }}</p>
+                    <p>Price: {{ prod.price }}</p>
+                    <p>Stock availability: {{ prod.quantity_in_stock }}</p>
+                <form method="get" action="{% url 'update_product' prod.pk %}">
+                    <input type="submit" value="Update">
+                </form>
+                <form method="get" action="{% url 'product_create' %}">
+                    <input type="submit" value="Add">
+                </form>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if request.user.is_anonymous %}
+            <form method="get" action="{% url 'login' %}">
+                <input type="submit" value="Login">
+            </form>
+            <form method="get" action="{% url 'registration' %}">
+                <input type="submit" value="Registration">
+            </form>
+            {% for prod in object_list %}
+                <div style="background-color: coral">
+                    <P>Product: {{ prod.name }}
+                    <p>Description: {{ prod.description }}</p>
+                    <p>Price: {{ prod.price }}</p>
+                    <p>Stock availability: {{ prod.quantity_in_stock }}</p>
+                </form>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+
+    {% endblock %}
+</div>
+</body>
+</html>
