@@ -7,13 +7,20 @@
 <body>
 <div style="background-color: aqua">
     {% block content %}
+        {% if messages %}
+            {% for message in messages %}
+                <h1 style="background-color: red">{{ message }}</h1>
+            {% endfor %}
+        {% endif %}
         {% if request.user.is_authenticated and request.user.is_superuser == False %}
+            <h2 style="background-color: bisque">{{ request.user }}</h2> <br>
+            <h4>Your balance: {{ request.user.wallet }}</h4>
             <form method="get" action="{% url 'logout' %}">
                 <br>
                 <input type="submit" value="Logout">
             </form>
             {% for prod in object_list %}
-                <form method="get" action="{% url 'create_purchase' prod.pk%}">
+                <form method="post" action="{% url 'create_purchase' %}">
                     <div style="background-color: coral">
                         <P>Product: {{ prod.name }}
                         <p>Description: {{ prod.description }}</p>
@@ -21,11 +28,17 @@
                         <p>Stock availability: {{ prod.quantity_in_stock }}</p>
                         <p>{{ purchase_form }}</p>
                         {% csrf_token %}
-                        <input type="submit" value="Buy">
+                        <input type="hidden" name="product_id" value="{{ prod.id }}">
+                        <input type="submit" value="buy">
                     </div>
+                </form>
+                <form method="get" action="{% url 'purchase' %}">
+                <input type="submit" value="My purchases">
                 </form>
             {% endfor %}
         {% endif %}
+
+
         {% if request.user.is_superuser %}
             <form method="get" action="{% url 'logout' %}">
                 <br>
@@ -62,7 +75,6 @@
                     <p>Description: {{ prod.description }}</p>
                     <p>Price: {{ prod.price }}</p>
                     <p>Stock availability: {{ prod.quantity_in_stock }}</p>
-                </form>
                 </div>
             {% endfor %}
         {% endif %}

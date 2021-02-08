@@ -27,7 +27,7 @@ class Purchase(models.Model):
     time_of_buy = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'User_id-{self.user.id} | Product-{self.product.name} | qt.{self.quantity_of_products}'
+        return f'User_id-{self.user.id} | Product-{self.product.name} | qt.{self.quantity_of_products} | id-{self.id}'
 
 
 class PurchaseReturns(models.Model):
