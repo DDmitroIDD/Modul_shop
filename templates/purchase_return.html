@@ -1,11 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <form method="post">
-{#        {% for return in object_list %}#}
-{#            {{ return }}#}
-{#        {% endfor %}#}
+
+        {% for return in object_list %}
+            <div style="background-color: #ecb23e">
+                <p>Product: {{ return.purchase.product.name }}</p>
+                <p>User: {{ return.purchase.user.username }}</p>
+                <p>Quantity: {{ return.purchase.quantity_of_products }}</p>
+                <form method="post" action="{% url 'delete_purchase' return.purchase.pk %}">
+                    <input type="hidden" name="product_pk" value="{{ return.purchase.product.pk }}">
+                    <input type="hidden" name="product_price" value="{{ return.purchase.product.price }}">
+                    <input type="hidden" name="purchase_quantity" value="{{ return.purchase.quantity_of_products }}">
+                    <input type="hidden" name="purchase_user" value="{{ return.purchase.user.pk }}">
+                    <input type="submit" value="Approve">
+                    {% csrf_token %}
+                </form>
+                <form method="post" action="{% url 'delete_return' return.pk %}">
+                    <input type="submit" value="Disapprove">
+                    {% csrf_token %}
+                </form>
+            </div>
+        {% endfor %}
     {{ return_form }}
-    </form>
+
 
 {% endblock %}

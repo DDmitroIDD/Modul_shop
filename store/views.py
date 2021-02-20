@@ -1,10 +1,11 @@
 from datetime import timedelta
 
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils import timezone
-from django.views.generic import CreateView, ListView, DetailView, UpdateView
+from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 
 from store.forms import UserForm, ProductForm, PurchaseForm, PurchaseReturnForm
 from store.models import CustomUser, Product, Purchase, PurchaseReturns
@@ -23,7 +24,8 @@ class UserCreateView(CreateView):
         return super().form_valid(form)
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'is_superuser'
     model = Product
     form_class = ProductForm
     success_url = '/create_product/'
@@ -60,19 +62,22 @@ class PurchaseCreateView(CreateView):
 class PurchaseReturnCreateView(CreateView):
     model = PurchaseReturns
     form_class = PurchaseReturnForm
-    success_url = 'purchase'
+    success_url = '/purchase'
     template_name = 'purchase_return.html'
 
     def form_valid(self, form):
-        object = form.save(commit=False)
+        self.object = form.save(commit=False)
         purchase = Purchase.objects.get(id=self.request.POST['purchase_id'])
+        returns = PurchaseReturns.objects.filter(purchase=purchase)
         if purchase.time_of_buy + timedelta(minutes=3) < timezone.now():
             messages.error(self.request, 'SORRY, can be returned only 3 minutes after purchase!')
             return redirect('purchase')
-
-        object.purchase_id = self.request.POST['purchase_id']
-        # object.purchase = purchase
-        object.save()
+        elif returns:
+            messages.info(self.request, 'Your return request is already being processed!')
+            return redirect('purchase')
+        messages.info(self.request, 'Your request in work!')
+        self.object.purchase = purchase
+        self.object.save()
         return super().form_valid(form=form)
 
 
@@ -100,14 +105,41 @@ class PurchasePageView(ListView):
         return super().get_queryset().filter(user=self.request.user)
 
 
-class ReturnPageView(ListView):
+class ReturnPageView(PermissionRequiredMixin, ListView):
+    permission_required = 'is_superuser'
     model = PurchaseReturns
     template_name = 'purchase_return.html'
 
 
-class UpdateProductView(UpdateView):
+class UpdateProductView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'is_superuser'
     success_url = '/'
     model = Product
     fields = '__all__'
     template_name = 'update_product.html'
+
+
+class PurchaseDeleteView(DeleteView):
+    model = Purchase
+    template_name = 'delete_purchase.html'
+    success_url = '/'
+
+    def post(self, request, *args, **kwargs):
+        product_pk = self.request.POST['product_pk']
+        product_price = self.request.POST['product_price']
+        purchase_quantity = self.request.POST['purchase_quantity']
+        purchase_user = self.request.POST['purchase_user']
+        product = Product.objects.get(id=product_pk)
+        user = CustomUser.objects.get(id=purchase_user)
+        product.quantity_in_stock += int(purchase_quantity)
+        user.wallet += int(product_price) * int(purchase_quantity)
+        user.save()
+        product.save()
+        return super().post(request, *args, **kwargs)
+
+
+class ReturnDeleteView(DeleteView):
+    model = PurchaseReturns
+    template_name = 'delete_return.html'
+    success_url = '/'
 

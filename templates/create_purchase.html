@@ -20,10 +20,8 @@
                 <p>Time of buy: {{ purchase.time_of_buy }}</p>
                 <p>id: {{ purchase.id }}</p>
                 {% csrf_token %}
-                {{ return_form }}
                 <input type="hidden" name="purchase_id" value="{{ purchase.id }}">
                 <input type="submit" value="Return order">
-
             </div>
         </form>
     {% endfor %}

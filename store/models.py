@@ -35,4 +35,4 @@ class PurchaseReturns(models.Model):
     time_of_request = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'User_id-{self.purchase.user.id} Prod.-{self.purchase.product.name}'
+        return f'User_id-{self.purchase.user.id} Prod.-{self.purchase.product.name} {self.purchase.product.id} '

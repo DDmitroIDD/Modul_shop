@@ -34,4 +34,4 @@ class PurchaseForm(ModelForm):
 class PurchaseReturnForm(ModelForm):
     class Meta:
         model = PurchaseReturns
-        fields = '__all__'
+        fields = []

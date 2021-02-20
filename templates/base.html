@@ -44,7 +44,7 @@
                 <br>
                 <input type="submit" value="Logout">
             </form>
-            <form method="get" action="{% url 'purchase_return' %}">
+            <form method="get" action="{% url 'returns' %}">
                 <input type="submit" value="Return view">
             </form>
             {% for prod in object_list %}
